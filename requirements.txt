@@ -2,6 +2,8 @@
 Django==5.2.19
 # JSON API (APIView, Serializer, Response)
 djangorestframework==3.16.1
+# API 문서 (Swagger UI, /api/docs/)
+drf-spectacular==0.30.0
 # 진단 대상 페이지 / robots.txt / sitemap.xml 요청
 requests==2.34.2
 # HTML 파싱 (title, meta, og, JSON-LD 추출)

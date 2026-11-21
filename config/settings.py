@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     # 외부 라이브러리
     'rest_framework',
+    'drf_spectacular',
     # 프로젝트 앱
     'diagnose',
 ]
@@ -127,4 +128,11 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 REST_FRAMEWORK = {
     'EXCEPTION_HANDLER': 'diagnose.exceptions.custom_exception_handler',
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+}
+
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'SEO 진단 API',
+    'DESCRIPTION': 'URL을 받아 SEO 기본 항목 5개를 점검하고 pass / warn / fail로 판정합니다.',
+    'VERSION': '1.0.0',
 }
