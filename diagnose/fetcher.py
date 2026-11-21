@@ -1,5 +1,9 @@
+import logging
+
 import requests
 from rest_framework.exceptions import APIException
+
+logger = logging.getLogger(__name__)
 
 TIMEOUT = 5  # 초
 HEADERS = {'User-Agent': 'Mozilla/5.0 (compatible; SeoScopeBot/1.0)'}
@@ -18,8 +22,11 @@ def fetch(url):
     try:
         return requests.get(url, headers=HEADERS, timeout=TIMEOUT)
     except requests.Timeout:
+        logger.warning('요청 시간 초과: %s', url)
         raise FetchError(f'대상 서버가 {TIMEOUT}초 안에 응답하지 않았습니다.', status_code=504)
-    except requests.RequestException:
+    except requests.RequestException as e:
+        # 응답에는 원인을 노출하지 않고 서버 로그에만 남긴다
+        logger.warning('요청 실패: %s (%s)', url, e)
         raise FetchError('대상 서버에 연결할 수 없습니다.')
 
 
