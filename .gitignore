@@ -1,0 +1,25 @@
+# Python
+__pycache__/
+*.py[cod]
+
+# 가상환경
+.venv/
+venv/
+
+# 환경변수 / 비밀값
+.env
+
+# Django
+db.sqlite3
+*.log
+
+# 테스트 / 커버리지
+.pytest_cache/
+.coverage
+htmlcov/
+
+# IDE / OS
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
