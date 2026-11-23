@@ -99,7 +99,7 @@ def check_json_ld(soup):
             items = data
         else:
             items = []
-        types +=[str(item.get('@type')) for item in items if isinstance(item, dict) and item.get('@type')]
+        types += [str(item.get('@type')) for item in items if isinstance(item, dict) and item.get('@type')]
 
     return make_result('json_ld', 'pass', f'JSON-LD {len(scripts)}개 ({", ".join(types) or "@type 없음"})')
 

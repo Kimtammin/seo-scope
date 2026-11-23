@@ -171,11 +171,15 @@ python manage.py test
 
 ## 한계 및 개선 방향
 
-과제 범위에 맞춰 아래 항목은 의도적으로 넣지 않았습니다.
+과제 범위에 맞춰 아래 항목은 의도적으로 넣지 않았습니다. 요청은 `fetcher.py`, 판정은 `checks.py`에 모여 있어서 대부분 해당 파일만 수정하면 됩니다.
 
-- **SSRF 방지**: 내부망·사설 IP로의 요청을 막지 않습니다. 운영 시 DNS 조회 결과 검사와 네트워크 레벨 차단이 필요합니다.
-- **JS 렌더링**: 서버가 보낸 원본 HTML만 진단합니다. SPA는 결과가 다를 수 있으며, 필요하면 `fetcher`만 Playwright로 교체할 수 있습니다.
-- **길이 기준**: 글자 수 기준이라 실제 검색 결과의 픽셀 폭, 한글 폭과는 차이가 있습니다.
-- **noindex**: `<meta name="robots" content="noindex">`, `X-Robots-Tag` 헤더는 점검하지 않습니다.
-- **요청 처리**: 페이지, robots.txt, sitemap.xml을 순차로 요청하고 응답 크기를 제한하지 않습니다. 동시 요청과 크기 제한으로 개선할 수 있습니다.
-- **운영 설정**: `SECRET_KEY`, `DEBUG=True`는 로컬 실행용입니다. 운영 시 환경변수로 분리하고 gunicorn 등으로 실행해야 합니다.
+| 항목 | 현재 | 개선 방향 |
+|---|---|---|
+| SSRF 방지 | 내부망·사설 IP로의 요청을 막지 않음 | 요청 전 DNS 조회 결과 IP가 공인 주소인지 검사(`ipaddress.is_global`)하고, 리다이렉트를 직접 따라가며 매번 검사. 운영에서는 방화벽·프록시로 내부망 접근을 함께 차단 |
+| JS 렌더링 | 서버가 보낸 원본 HTML만 진단 (SPA는 결과가 다를 수 있음) | `fetcher`만 Playwright로 교체하는 옵션 추가. 링크 미리보기 봇은 JS를 실행하지 않으므로 원본 HTML 진단은 기본값으로 유지 |
+| 길이 기준 | 글자 수 기준이라 검색 결과의 픽셀 폭, 한글 폭과 차이 있음 | 한글·영문에 가중치를 두고 세는 방식으로 실제 표시 폭에 가깝게 판정 |
+| noindex | `<meta name="robots" content="noindex">`, `X-Robots-Tag` 헤더는 점검하지 않음 | robots 항목에 함께 점검. robots.txt보다 직접적인 색인 차단이라 우선순위가 높음 |
+| robots.txt 해석 | 표준 `urllib.robotparser` 사용 (경로 와일드카드 `*`, `$` 미지원) | Google 규칙을 따르는 파서(예: protego)로 교체 |
+| 요청 처리 | 페이지, robots.txt, sitemap.xml을 순차 요청. 응답 크기 제한, 재시도 없음 | 스트리밍으로 읽으며 크기·전체 시간 제한. 연결 실패와 503에만 백오프 재시도 |
+| 처리량 | 진단이 끝날 때까지 서버 워커가 대기 | Celery 같은 작업 큐로 분리해 작업 ID를 먼저 돌려주고 결과는 조회 API로 제공. 같은 URL은 결과를 캐시해 반복 요청 감소 |
+| 운영 설정 | `SECRET_KEY`, `DEBUG=True`는 로컬 실행용 | 환경변수로 분리하고 `DEBUG=False`, `ALLOWED_HOSTS` 설정 후 Nginx + gunicorn으로 실행. 요청 횟수 제한(throttling) 추가 |
